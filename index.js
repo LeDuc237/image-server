@@ -35,7 +35,7 @@ app.use(cors());
 app.use(express.json());
 
 // Upload endpoint
-app.post('/upload', upload.single('profilePhoto'), (req, res) => {
+app.post('/uploads', upload.single('profilePhoto'), (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ error: 'No file uploaded' });
