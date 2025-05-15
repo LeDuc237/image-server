@@ -6,8 +6,7 @@ const { CloudinaryStorage } = require('multer-storage-cloudinary');
 require('dotenv').config();
 
 const app = express();
-const PORT = process.env.PORT || 3001;
-
+const PORT = process.env.PORT || 10000;
 // Configure Cloudinary
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -33,6 +32,11 @@ const upload = multer({ storage });
 // Middleware
 app.use(cors());
 app.use(express.json());
+
+
+app.get("/", (req, res) => {
+  res.send("Image Server is Running 🚀");
+});
 
 // Upload endpoint
 app.post('/uploads', upload.single('profilePhoto'), (req, res) => {
