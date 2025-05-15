@@ -1,6 +1,7 @@
 {
     "name": "image-server",
     "version": "1.0.0",
+     "license": "MIT",
     "scripts": {
         "start": "node index.js"
     },
