@@ -8,14 +8,18 @@ require('dotenv').config();
 const app = express();
 const PORT = process.env.PORT || 10000;
 // Configure Cloudinary
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET
-}).catch(error => {
+// ✅ Correct (synchronous configuration)
+try {
+  cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET
+  });
+  console.log('Cloudinary configured successfully');
+} catch (error) {
   console.error('Cloudinary config failed:', error);
-  process.exit(1); // Crash if config fails
-});
+  process.exit(1);
+}
 
 // Cloudinary storage configuration
 const storage = new CloudinaryStorage({
