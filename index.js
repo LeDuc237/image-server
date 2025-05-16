@@ -12,6 +12,9 @@ cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
   api_secret: process.env.CLOUDINARY_API_SECRET
+}).catch(error => {
+  console.error('Cloudinary config failed:', error);
+  process.exit(1); // Crash if config fails
 });
 
 // Cloudinary storage configuration
@@ -40,11 +43,15 @@ app.get("/", (req, res) => {
 
 // Upload endpoint
 app.post('/uploads', upload.single('profilePhoto'), (req, res) => {
+  console.log('Upload request received');
   try {
     if (!req.file) {
       return res.status(400).json({ error: 'No file uploaded' });
     }
 
+     const publicId = req.file.public_id; // Format: "user-profiles/filename"
+  const filename = publicId.split('/').pop(); // Extract "filename"
+  
     res.status(200).json({
       imageUrl: req.file.path,
       publicId: req.file.filename
