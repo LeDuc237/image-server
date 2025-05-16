@@ -24,13 +24,13 @@ try {
 // Cloudinary storage configuration
 const storage = new CloudinaryStorage({
   cloudinary: cloudinary,
-  params: {
-    folder: 'user-profiles',
-    allowed_formats: ['jpg', 'jpeg', 'png', 'gif', 'webp'],
-    public_id: (req, file) => {
-      const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-      return file.fieldname + '-' + uniqueSuffix;
-    }
+  params: (req, file) => {
+    return {
+      folder: 'user-profiles',
+      allowed_formats: ['jpg', 'jpeg', 'png', 'gif', 'webp'],
+      public_id: `${Date.now()}-${file.originalname.split('.')[0]}`, // Better filename generation
+      transformation: [{ width: 500, height: 500, crop: 'limit' }]
+    };
   }
 });
 
@@ -45,25 +45,43 @@ app.get("/", (req, res) => {
   res.send("Image Server is Running 🚀");
 });
 
+// Add this after your routes
+app.use((err, req, res, next) => {
+  console.error('Global error handler:', err);
+  res.status(500).json({
+    error: 'Internal Server Error',
+    message: err.message
+  });
+});
+
+
 // Upload endpoint
 app.post('/uploads', upload.single('profilePhoto'), (req, res) => {
-  console.log('Upload request received');
   try {
     if (!req.file) {
       return res.status(400).json({ error: 'No file uploaded' });
     }
 
-     const publicId = req.file.public_id; // Format: "user-profiles/filename"
-  const filename = publicId.split('/').pop(); // Extract "filename"
-  
-    res.status(200).json({
-      imageUrl: req.file.path,
-      publicId: req.file.filename
-    });
+    // Get the Cloudinary public ID from the correct property
+    const publicId = req.file.filename; // Changed from public_id to filename
     
+    // Extract filename without folder path
+    const fileName = publicId.includes('/') 
+      ? publicId.split('/').pop() 
+      : publicId;
+
+    res.status(200).json({
+      fileName: fileName,
+      imageUrl: req.file.path
+    });
+
   } catch (error) {
     console.error('Upload error:', error);
-    res.status(500).json({ error: 'Failed to upload image' });
+    res.status(500).json({
+      error: 'Upload failed',
+      details: error.message,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
   }
 });
 
